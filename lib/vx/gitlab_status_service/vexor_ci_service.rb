@@ -28,12 +28,12 @@ class ::VexorCiService < ::Service
 
   def compose_service_hook
     hook = service_hook || build_service_hook
-    hook.url = [project_url, "/build", "?token=#{token}"].join("")
+    hook.url = [project_url, "/api/builds", "?token=#{token}"].join("")
     hook.save
   end
 
   def commit_status_path(sha)
-    project_url + "/builds/#{sha}/status.json?token=#{token}"
+    project_url + "/api/builds/#{sha}.json?token=#{token}"
   end
 
   def commit_status(sha)
