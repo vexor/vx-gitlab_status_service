@@ -22,18 +22,8 @@ class ::VexorCiService < ::Service
   validates :project_url, presence: true, if: :activated?
   validates :token, presence: true, if: :activated?
 
-  delegate :execute, to: :service_hook, prefix: nil
-
-  after_save :compose_service_hook, if: :activated?
-
-  def compose_service_hook
-    hook = service_hook || build_service_hook
-    hook.url = [project_url, "/api/builds", "?token=#{token}"].join("")
-    hook.save
-  end
-
   def commit_status_path(sha)
-    project_url + "/api/builds/#{sha}.json?token=#{token}"
+    project_url + "/api/builds/sha/#{sha}.json?token=#{token}"
   end
 
   def commit_status(sha)
@@ -47,15 +37,16 @@ class ::VexorCiService < ::Service
   end
 
   def build_page(sha)
-    project_url + "/builds/#{sha}"
+    project_url + "/builds/sha/#{sha}"
   end
 
   def builds_path
-    project_url + "?ref=" + project.default_branch
+    ""
   end
 
   def status_img_path
-    project_url + "/status.png?ref=" + project.default_branch
+    # project_url + "/status.png?ref=" + project.default_branch
+    ""
   end
 
   def title
@@ -75,5 +66,9 @@ class ::VexorCiService < ::Service
       { type: "text", name: "token", placeholder: "Vexor CI project specific token" },
       { type: "text", name: "project_url", placeholder: "http://ci.vexor.io/projects/3"}
     ]
+  end
+
+  def execute(push_data)
+    # NOOP
   end
 end
