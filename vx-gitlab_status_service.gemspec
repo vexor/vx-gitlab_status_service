@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Semenyuk Dmitriy"]
   spec.email         = ["mail@semenyukdmitriy.com"]
   spec.summary       = %q{Gitlab v6 build status service.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.description   = %q{Integrates Gitlab with Vexor CI (build status & build link on merge request pages)}
   spec.homepage      = ""
   spec.license       = "MIT"
 
