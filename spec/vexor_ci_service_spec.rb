@@ -80,11 +80,16 @@ describe VexorCiService do
     end
 
     describe :commit_status_path do
-      it { @service.commit_status_path("2ab7834c").should == "http://ci.gitlab.org/projects/2/builds/2ab7834c/status.json?token=verySecret"}
+      it { @service.commit_status_path("2ab7834c").should == "http://ci.gitlab.org/projects/2/api/builds/2ab7834c/status_for_gitlab.json"}
     end
 
     describe :build_page do
-      it { @service.build_page("2ab7834c").should == "http://ci.gitlab.org/projects/2/builds/2ab7834c"}
+      before do
+        response = double(code: 200, :[] => 'location')
+        response = OpenStruct.new(code: 200, location: 'build page')
+        HTTParty.stub(:get).and_return(response)
+      end
+      it { @service.build_page("2ab7834c").should == "build page"}
     end
   end
 end

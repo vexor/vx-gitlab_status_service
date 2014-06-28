@@ -16,28 +16,24 @@
 #  api_key     :string(255)
 #
 
+require 'uri'
+
 class ::VexorCiService < ::Service
   attr_accessible :project_url
 
-  validates :project_url, presence: true, if: :activated?
   validates :token, presence: true, if: :activated?
+  validates :project_url, :format => URI::regexp(%w(http https)), if: :activated?
 
   def commit_status_path(sha)
-    project_url + "/api/builds/sha/#{sha}.json?token=#{token}"
+    project_url + "/api/builds/#{sha}/status_for_gitlab.json"
   end
 
   def commit_status(sha)
-    response = HTTParty.get(commit_status_path(sha), verify: false)
-
-    if response.code == 200 && response["status"]
-      response["status"]
-    else
-      :error
-    end
+    request_build_status(sha, 'status') || :error
   end
 
   def build_page(sha)
-    project_url + "/builds/sha/#{sha}"
+    request_build_status sha, 'location'
   end
 
   def builds_path
@@ -54,21 +50,45 @@ class ::VexorCiService < ::Service
   end
 
   def description
-    "Continuous integration server from Vexor"
+    "Vexor continuous integration and deploy service"
   end
 
   def to_param
     "vexor_ci"
   end
 
+  def project_url
+    if super.blank?
+      'https://ci.vexor.io'
+    else
+      super
+    end
+  end
+
   def fields
     [
-      { type: "text", name: "token", placeholder: "Vexor CI project specific token" },
-      { type: "text", name: "project_url", placeholder: "http://ci.vexor.io/projects/3"}
+      { type: "text", name: "token", placeholder: "Project secure token" },
+      { type: "text", name: "project_url", placeholder: "https://ci.vexor.io"}
     ]
   end
 
   def execute(push_data)
     # NOOP
   end
+
+  private
+
+    def request_build_status(sha, key)
+      response = HTTParty.get(
+        commit_status_path(sha),
+        verify: false,
+        headers: {
+          'X-Vexor-Project-Token' => token
+        }
+      )
+
+      if response.code == 200 && response[key]
+        response[key]
+      end
+    end
 end

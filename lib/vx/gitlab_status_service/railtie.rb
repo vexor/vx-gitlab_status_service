@@ -17,17 +17,8 @@ module Vx
         # patch controller to make possible to show Vexor CI status on MR page instead of Gitlab CI
         Projects::MergeRequestsController.class_eval do
           def ci_status
-            status = @merge_request.source_project.vexor_ci_service.commit_status(merge_request.last_commit.sha)
-            vexor_ci_build_status_to_gitlab_status_map = {
-              initialized: :pending,
-              started: :running,
-              passed: :success,
-              failed: :failed,
-              errored: :failed
-            }.with_indifferent_access
-            response = {status: vexor_ci_build_status_to_gitlab_status_map[status]}
-
-            render json: response
+            status   = merge_request.source_project.vexor_ci_service.commit_status(merge_request.last_commit.sha)
+            render json: { status: status }
           end
         end
 
